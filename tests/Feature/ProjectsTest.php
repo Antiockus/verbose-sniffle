@@ -65,6 +65,16 @@ class ProjectsTest extends TestCase
     }
 
     /** @test */
+    public function an_authenticated_user_cannot_view_the_projects_of_others()
+    {
+        $this->be(factory('App\User')->create());
+        // $this->withoutExceptionHandling();
+        $project = factory('App\Project')->create();
+
+        $this->get($project->path())->assertStatus(403);
+    }
+
+    /** @test */
     public function a_project_requires_a_title()
     {
         $this->actingAs(factory('App\User')->create());
@@ -79,5 +89,13 @@ class ProjectsTest extends TestCase
         $attributes = factory('App\Project')->raw(['description' => '']);
 
         $this->post('/projects', $attributes)->assertSessionHasErrors('description');
+    }
+
+    /** @test */
+    public function it_belongs_to_an_owner()
+    {
+        $project = factory('App\Project')->create();
+
+        $this->assertInstanceOf('App\User', $project->owner);
     }
 }
